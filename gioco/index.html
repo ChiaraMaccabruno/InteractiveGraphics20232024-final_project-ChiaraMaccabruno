@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" src="style.css" type="text/css">
+    <title>Tetris with Three.js</title>
+    <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+    .swal-overlay {
+        background-color: rgba(3, 0, 0, 0.8);
+    }
+
+    .swal-footer {
+        background-color: rgb(245, 248, 250);
+        margin-top: 32px;
+        border-top: 1px solid #E9EEF1;
+        overflow: hidden;
+    }
+
+    .swal-title {
+        margin: 0px;
+        font-size: 29px;
+        color: #000000;
+        box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+        margin-bottom: 28px;
+    }
+
+    .swal-text {
+        padding: 17px;
+        display: block;
+        font-size: 20px;
+        margin: 22px;
+        text-align: center;
+        color: #000000;
+    }
+
+    .swal-button {
+        padding: 7px 19px;
+        border-radius: 2px;
+        background: linear-gradient(145deg, #5659b8, #15065f);
+        font-size: 17px;
+        border: 1px solid #3e549a;
+        text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.3);
+    }
+
+    #particles-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1; /* Posiziona le particelle davanti al background */
+    }
+    #controls-container{
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #150f0f, #151313);
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        max-width: 300px;
+        margin: 20px auto;
+        text-align: center;
+        font-family: 'Arial', sans-serif;
+        position: absolute;
+        top: 370px;
+        left: 10px;
+        padding: 12px;
+    }
+    #controls-container label{
+        font-size: 18px;
+        color: #cac6c6;
+        margin: 10px 0;
+    }
+    #controls-container input{
+        color: #90acd1;
+        display: 'block';
+        width: '100px';
+    }
+    #control-panel {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #150f0f, #151313);
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        max-width: 300px;
+        margin: 20px auto;
+        text-align: center;
+        font-family: 'Arial', sans-serif;
+        }
+    #control-panel p {
+        font-size: 18px;
+        color: #cac6c6;
+        margin: 10px 0;
+    }
+
+    #control-panel span {
+        font-weight: bold;
+        color: #cac7c7;
+    }
+
+    #control-panel button {
+        padding: 10px 20px;
+        margin: 10px 5px;
+        background: linear-gradient(145deg, #5659b8, #15065f);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    #control-panel button:hover {
+        background: linear-gradient(145deg, #15065f, #5659b8);
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.10);
+    }
+
+    #control-panel button:active {
+        background: linear-gradient(145deg, #5659b8, #15065f);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    #control-panel #timer{
+        font-weight: bold;
+        color: #cac7c7;
+        margin: 10px 0;
+    }
+
+    #score-message{
+        color: white;
+        display: none;
+    }
+
+    .popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7); /* sfondo semi-trasparente con sfocatura */
+        /*backdrop-filter: blur(5px);*/
+        z-index: 1000; /* assicura che il popup sia sopra gli altri contenuti */
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        animation: fadeIn 0.3s ease forwards;
+    }
+
+    .popup-content {
+        background-color: #fff;
+        max-width: 300px;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 2px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease forwards;
+    }
+
+    .popup-content img {
+        width: 80px;
+        margin-bottom: 20px;
+    }
+
+    .popup-content h2 {
+        margin-top: 0;
+        font-size: 40px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .popup-content p {
+        margin-bottom: 15px;
+        color: #413c3c;
+        font-size: large;
+    }
+
+    .popup-content button {
+        padding: 10px 20px;
+        margin: 5px;
+        background: linear-gradient(145deg, #5659b8, #15065f);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 16px;
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .popup-content button:hover {
+        background: linear-gradient(145deg, #15065f, #5659b8);
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.10);
+    }
+
+    .popup-content button:active {
+        background: linear-gradient(145deg, #5659b8, #15065f);
+        box-shadow: 0 2px 4px rgba(30, 28, 28, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+   
+    #high-scores {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: linear-gradient(135deg, #150f0f, #151313);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        margin: 20px auto;
+        width: 300px;
+        text-align: center;
+    }
+
+    #high-scores h2 {
+        margin: 0 0 20px;
+        font-size: 30px;
+        color: #ecf0f1;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    #high-scores-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    #high-scores-list li {
+        background: linear-gradient(145deg, #5659b8, #15065f);
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 18px;
+        color: #e8e9eb;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+
+    #high-scores-list li:hover {
+        transform: scale(1.05);
+        background: linear-gradient(145deg,#15065f, #5659b8 );
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .points-notification {
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        display: none;
+        opacity: 1;
+        transition: opacity 1s ease-out;
+    }
+
+
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+        0% { transform: scale(0.8); }
+        100% { transform: scale(1); }
+    }
+
+
+    </style>
+</head>
+<body>
+    <script>
+    window.onload = function() {
+        swal("Welcome in the world of 3D Tetris!", "The aim of the game is to align the tetraminis to complete the lines on the playing surface. Each completed row earns you points, and if you manage to overcome 300 points, they will begin to appear mysterious objects. By clicking on it, you will get advantages that facilitate the game, but beware of the disadvantages! Face the challenge and you will see how skilled you are in manipulating these tetraminis in a three-dimensional world!");
+    }
+    </script>
+
+    <div id="control-panel">
+        <div id="timer">00:00</div>
+        <div id="temporary-message"></div>
+
+        <p>Score: <span id="score">0</span></p>
+        <p>Level: <span id="level">1</span></p>
+
+        <button id="start-button">Start</button>
+        <button id="stop-button">Stop</button>
+        <button id="reset-button">Reset</button>
+    </div>
+
+    <div id="controls-container">
+        <label>
+          Light X:
+          <br>
+          <input type="range" id="lightX" min="-15" max="15" step="0.1" value="0">
+        </label>
+        <label>
+          Light Y:
+          <br>
+          <input type="range" id="lightY" min="-10" max="15" step="0.1" value="0">
+        </label>
+        <label>
+          Light Z:
+          <br>
+          <input type="range" id="lightZ" min="-15" max="15" step="0.1" value="10">
+        </label>
+    </div>
+
+    <div id="game-over-popup" class="popup">
+        <div class="popup-content">
+            <img src="./src/game-over.png" alt="Game Over Icon">
+            <h2>Game Over!</h2>
+            <p>Do you want to play again?</p>
+            <button id="play-again-button">Play Again</button>
+        </div>
+    </div>
+
+    <div id="high-scores">
+        <h2>High Scores</h2>
+        <ul id="high-scores-list"></ul>
+    </div>
+    
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <!--<script src="webglBackground.js"></script>-->
+    <script type="module" src="main.js"></script>
+    <!--<script src="particles.js"></script>-->
+    <script type="module" src="game.js"></script>
+    
+</body>
+</html>
+

@@ -223,7 +223,6 @@ function handleGameOver() {
         gameOverPopup.style.display = 'block';
     } else {
         console.error('Element with id "game-over-popup" not found in the DOM');
-        // Gestisci il caso in cui l'elemento non è stato trovato
         return;
     }
 
@@ -239,7 +238,6 @@ function handleGameOver() {
         });
     } else {
         console.error('Element with id "play-again-button" not found in the DOM');
-        // Gestisci il caso in cui l'elemento non è stato trovato
         return;
     }
 }
